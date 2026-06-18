@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python scripts/crear_logo_oscuro.py)",
+      "Bash(pip install *)",
+      "Bash(python -c ' *)"
+    ]
+  }
+}

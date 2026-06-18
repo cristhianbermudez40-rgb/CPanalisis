@@ -1,0 +1,11 @@
+{
+  "version": "1.1.0",
+  "fecha": "2026-05-21",
+  "notas": [
+    "Historial mensual con backups automáticos",
+    "Gráficas de tendencia por mes",
+    "Sistema de notificación de actualizaciones",
+    "Fix columna area en impresoras_red",
+    "Configurador MySQL integrado en el EXE"
+  ]
+}

@@ -1,0 +1,5 @@
+# AVISTA CPAnalisis — Proxy SNMP
+# Sin dependencias externas. Solo necesita Python 3.9+
+# stdlib pura: socket, http.server, json, threading, ipaddress, re, pathlib
+
+# No ejecutar pip install aqui. El archivo .py funciona tal cual.

@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AVISTA CPAnalisis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body class="light-theme">
+    <!-- Overlay de carga para operaciones largas (importar correos, etc.) -->
+    <div id="loading-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(10,20,40,0.88);display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px;">
+        <img id="loading-logo" src="assets/avista%20logo.png" alt="Avista" style="height:64px;filter:brightness(0) invert(1);animation:pulse-logo 1.5s ease-in-out infinite;" />
+        <div class="spinner-border text-light" style="width:3rem;height:3rem;" role="status"></div>
+        <p id="loading-msg" style="color:#fff;font-size:1rem;font-weight:600;letter-spacing:0.5px;">Importando correos...</p>
+        <style>
+            @keyframes pulse-logo { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(0.96)} }
+        </style>
+    </div>
+
+    <div id="login-overlay" class="login-overlay">
+        <!-- Panel izquierdo — Branding -->
+        <div class="login-left-panel">
+            <img class="login-left-logo" src="assets/avista%20logo.png" alt="Avista" />
+            <h2 class="login-left-title">CP<span>Análisis</span><br>Platform</h2>
+            <p class="login-left-sub">
+                Centro de control de impresión empresarial.<br>
+                Monitoreo en tiempo real, contadores SNMP,<br>
+                análisis multi-sede y reportes avanzados.
+            </p>
+            <div class="login-left-badge">
+                ✦&nbsp; Un único acceso administrativo
+            </div>
+        </div>
+        <!-- Panel derecho — Formulario -->
+        <div class="login-right-panel">
+            <img class="login-right-logo" src="assets/avista%20logo.png" alt="Avista" />
+            <h1 class="login-card-title">Inicio de Sesión Unificado</h1>
+            <p class="login-card-sub">Un único usuario administrativo</p>
+            <div class="login-form-wrap">
+                <label for="login-user">Ingrese el usuario:</label>
+                <input id="login-user" class="login-input-field" placeholder="Admin AVISTA" autocomplete="username" />
+                <label for="login-pass">Contraseña:</label>
+                <input id="login-pass" class="login-input-field" type="password" placeholder="••••••••" autocomplete="current-password" />
+                <button id="btn-login" class="btn btn-login-main w-100">Iniciar Sesión</button>
+                <div id="login-status" class="login-status"></div>
+                <a href="#" class="login-forgot">¿Olvidó su contraseña? Contacte a soporte.</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="brand-wrap">
+                <div>
+                    <img class="brand-logo" src="assets/avista%20logo.png" alt="Avista" />
+                    <p class="subtitle">CPAnalisis</p>
+                </div>
+            </div>
+
+            <div class="side-search mb-3">
+                <input id="serial-filter" class="form-control form-control-sm" placeholder="Filtrar por numero de serie (ej. AB12345)" />
+                <div id="serial-filter-info" class="serial-filter-info">Escribe una serie para ver informacion relevante.</div>
+            </div>
+
+            <nav class="side-nav mb-3">
+                <a class="side-link active" data-section="inicio" href="#">Inicio</a>
+                <a class="side-link" data-section="estadisticas" href="#">Estadisticas</a>
+                <a class="side-link" data-section="contadores" href="#">Contadores</a>
+                <a class="side-link" data-section="reportes" href="#">Reportes</a>
+                <a class="side-link" data-section="historial" href="#">&#x1F4C5; Historial</a>
+                <a class="side-link" data-section="mantenimiento" href="#">Mantenimiento</a>
+                <a class="side-link" data-section="admin" href="#">Admin</a>
+                <a class="side-link" data-section="nueva-bd" href="#">&#x1F5C4; Nueva BD</a>
+                <a class="side-link" data-section="actualizaciones" href="#">&#x1F504; Actualizaciones</a>
+            </nav>
+
+            <button id="btn-load" class="btn btn-light w-100 mb-2">Cargar Excel</button>
+            <button id="btn-refresh" class="btn btn-outline-light w-100 mb-2">Actualizar Inicio</button>
+            <button id="btn-clean" class="btn btn-outline-warning w-100">Limpiar Registros</button>
+
+            <div class="side-footer">
+                <div class="user-dot"></div>
+                <div>
+                    <strong>Cristhian Bermúdez</strong>
+                    <p>AVISTA Colombia S.A.S.</p>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content">
+            <header class="topbar">
+                <div class="topbar-title">
+                    <h2>Centro de Control de Impresion</h2>
+                    <p>Monitoreo por oficina, usuario, contadores y rendimiento de toner.</p>
+                </div>
+                <div class="topbar-actions">
+                    <button id="btn-theme-toggle" class="btn theme-toggle-btn">☀ Modo claro</button>
+                    <button id="btn-export-data" class="btn top-pill">Exportar datos</button>
+                    <button id="btn-create-report" class="btn top-pill secondary">Crear reporte</button>
+                </div>
+            </header>
+
+            <div class="content-inner p-4">
+            <section class="view-section" data-section="inicio">
+            <section class="headline mb-4">
+                <div>
+                    <h2>Dashboard Empresarial de Impresiones</h2>
+                    <p>Analisis multi-sede, comparativos mensuales y mantenimiento preventivo.</p>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <div id="load-status" class="status-pill">Actualizado</div>
+                    <button id="btn-actualizar-todo" class="btn btn-outline-warning btn-sm">
+                        &#x21BA; Actualizar Todo
+                    </button>
+                </div>
+            </section>
+
+            <section class="metrics-grid mb-4">
+                <article class="metric-card">
+                    <h3>Total Impresiones</h3>
+                    <p id="total-prints">0</p>
+                </article>
+                <article class="metric-card">
+                    <h3>Top Usuario</h3>
+                    <p id="top-user">-</p>
+                </article>
+                <article class="metric-card">
+                    <h3>Top Oficina</h3>
+                    <p id="top-office">-</p>
+                </article>
+                <article class="metric-card">
+                    <h3>Oficina en Reduccion</h3>
+                    <p id="office-reduction">-</p>
+                </article>
+            </section>
+
+            <!-- Banner de alertas de tóner -->
+            <div id="alert-banner" class="alert-banner-wrap" style="display:none;"></div>
+
+            <!-- Impresoras con contadores actuales del correo -->
+            <section class="panel mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h3 class="mb-0">Contadores Actuales por Impresora</h3>
+                    <span id="dashboard-counters-status" class="small text-muted"></span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-dark table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Impresora</th>
+                                <th>Serie</th>
+                                <th>Oficina</th>
+                                <th class="text-end">Contador (Correo)</th>
+                                <th>Ultima lectura</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashboard-counters-body">
+                            <tr><td colspan="5" class="text-muted text-center">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            </section>
+
+            <section class="view-section" data-section="estadisticas" style="display:none;">
+
+            <!-- Tarjetas KPI -->
+            <section class="metrics-grid mb-4" id="stats-counters-grid">
+                <article class="metric-card">
+                    <h3>Contador Máquina (Correo)</h3>
+                    <p id="stat-cnt-maquina">-</p>
+                    <small class="text-muted">Suma últimos correos por impresora</small>
+                </article>
+                <article class="metric-card">
+                    <h3>Contador Proveedor (Excel)</h3>
+                    <p id="stat-cnt-proveedor">-</p>
+                    <small id="stat-cnt-maquina-periodo" class="text-muted"></small>
+                </article>
+            </section>
+
+            <!-- ===== GRÁFICA CONTADORES GENERALES ===== -->
+            <section class="panel mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="mb-0">Contadores Generales</h3>
+                    <div>
+                        <span class="badge bg-primary me-1">INTERNO</span>
+                        <span class="badge bg-warning text-dark">EXTERNO</span>
+                    </div>
+                </div>
+                <p class="small text-muted mb-3">Último contador registrado por correo para cada impresora. Color rojo = tóner bajo.</p>
+                <div id="chart-general-wrap" style="position:relative;width:100%;min-height:260px;">
+                    <canvas id="chart-contadores-general"></canvas>
+                </div>
+                <div id="chart-general-status" class="small text-muted mt-2"></div>
+            </section>
+
+            <!-- ===== GRÁFICA POR OFICINA ===== -->
+            <section class="panel mb-4">
+                <h3 class="mb-3">Contadores por Oficina</h3>
+                <div class="row g-2 mb-3 align-items-end">
+                    <div class="col-auto" style="min-width:260px;max-width:420px;flex:1;">
+                        <label class="form-label small mb-1">Seleccionar oficina</label>
+                        <div id="chart-oficina-select" class="custom-sel" data-placeholder="-- Seleccionar oficina --">
+                            <button type="button" class="custom-sel-btn form-select form-select-sm" data-value="">-- Seleccionar oficina --</button>
+                            <div class="custom-sel-menu"></div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <button id="btn-chart-oficina" class="btn btn-primary btn-sm">Ver graficas</button>
+                    </div>
+                    <div id="chart-oficina-status" class="col-12 small text-muted"></div>
+                </div>
+                <div id="chart-oficina-wrap" style="position:relative;width:100%;min-height:240px;display:none;">
+                    <canvas id="chart-contadores-oficina"></canvas>
+                </div>
+            </section>
+
+            <!-- ===== ANÁLISIS POR IMPRESORA ===== -->
+            <section class="panel mb-4">
+                <h3 class="mb-3">Evolución de una Impresora</h3>
+                <div class="row g-2 mb-3 align-items-end">
+                    <div class="col-auto" style="min-width:260px;max-width:520px;flex:1;">
+                        <label class="form-label small mb-1">Seleccionar impresora</label>
+                        <div id="stat-printer-select" class="custom-sel" data-placeholder="-- Seleccionar impresora --">
+                            <button type="button" class="custom-sel-btn form-select form-select-sm" data-value="">-- Seleccionar impresora --</button>
+                            <div class="custom-sel-menu"></div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <button id="btn-stat-printer" class="btn btn-primary btn-sm">Ver evolución</button>
+                    </div>
+                    <div id="stat-printer-status" class="col-12 small text-muted"></div>
+                </div>
+                <div id="stat-printer-charts" style="display:none;">
+                    <div class="row g-4 mb-4">
+                        <div class="col-12 col-lg-7">
+                            <p class="small text-muted mb-2">Evolución del Contador</p>
+                            <div style="position:relative;width:100%;min-height:220px;">
+                                <canvas id="chart-printer-contador"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-5">
+                            <p class="small text-muted mb-2">Nivel de Tóner (%)</p>
+                            <div style="position:relative;width:100%;min-height:220px;">
+                                <canvas id="chart-printer-toner"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-dark table-hover" id="printer-hist-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th class="text-end">Contador</th>
+                                    <th class="text-end">Total Impreso</th>
+                                    <th class="text-center">Tóner</th>
+                                </tr>
+                            </thead>
+                            <tbody id="printer-hist-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            </section>
+
+            <section class="view-section" data-section="contadores" style="display:none;">
+
+            <!-- ===== ACTUALIZAR DESDE CORREO ===== -->
+            <section class="panel mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h3 class="mb-0">&#x1F4E7; Actualizar desde correo</h3>
+                    <span id="cnt-mail-status" class="small text-light"></span>
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-md-3">
+                        <input id="cnt-mail-user" class="form-control form-control-sm" placeholder="Correo" />
+                    </div>
+                    <div class="col-md-3">
+                        <input id="cnt-mail-pass" class="form-control form-control-sm" type="password" placeholder="Contrasena del correo" />
+                    </div>
+                    <div class="col-md-3">
+                        <input id="cnt-mail-host" class="form-control form-control-sm" placeholder="IMAP host" />
+                    </div>
+                    <div class="col-md-1">
+                        <input id="cnt-mail-folder" class="form-control form-control-sm" placeholder="Carpeta" />
+                    </div>
+                    <div class="col-md-1">
+                        <input id="cnt-mail-max" class="form-control form-control-sm" type="number" min="1" max="500" value="200" placeholder="Max" />
+                    </div>
+                    <div class="col-md-1">
+                        <button id="btn-cnt-mail-import" class="btn btn-warning w-100 btn-sm">Actualizar</button>
+                    </div>
+                </div>
+                <div class="d-flex gap-3 align-items-center">
+                    <div class="form-check mb-0">
+                        <input class="form-check-input" type="checkbox" id="cnt-mail-only-unseen">
+                        <label class="form-check-label small text-light" for="cnt-mail-only-unseen">Solo no leidos</label>
+                    </div>
+                    <small class="text-secondary">Importa los ultimos correos de la carpeta "datecsa" y actualiza contadores y toner de cada impresora.</small>
+                </div>
+            </section>
+
+            <section class="panel mb-4">
+                <h3>Registrar Impresora en Red</h3>
+                <div class="row g-2 mb-2">
+                    <div class="col-md-3">
+                        <input id="ip-reg-nombre" class="form-control form-control-sm" placeholder="Nombre de la impresora" />
+                    </div>
+                    <div class="col-md-2">
+                        <input id="ip-reg-oficina" class="form-control form-control-sm" placeholder="Oficina" />
+                    </div>
+                    <div class="col-md-2">
+                        <input id="ip-reg-ip" class="form-control form-control-sm" placeholder="Direccion de red" />
+                    </div>
+                    <div class="col-md-1">
+                        <input id="ip-reg-serie" class="form-control form-control-sm" placeholder="Num. serie" />
+                    </div>
+                    <div class="col-md-1">
+                        <input id="ip-reg-modelo" class="form-control form-control-sm" placeholder="Modelo" value="M3655idn" />
+                    </div>
+                    <div class="col-md-2">
+                        <div id="ip-reg-canal" class="custom-sel" data-placeholder="Canal (opcional)">
+                            <button type="button" class="custom-sel-btn form-select form-select-sm" data-value="">Canal (opcional)</button>
+                            <div class="custom-sel-menu">
+                                <button type="button" class="custom-sel-item" data-value="">Canal (opcional)</button>
+                                <button type="button" class="custom-sel-item" data-value="INTERNO">INTERNO</button>
+                                <button type="button" class="custom-sel-item" data-value="EXTERNO">EXTERNO</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <button id="btn-reg-ip" class="btn btn-success w-100 btn-sm">Guardar</button>
+                    </div>
+                </div>
+                <div id="ip-reg-status" class="small text-light"></div>
+            </section>
+
+            <!-- ===== IMPRESORAS REGISTRADAS ===== -->
+            <section class="panel mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h3 class="mb-0">Impresoras Registradas en Red</h3>
+                    <div class="d-flex gap-2">
+                        <button id="btn-sincronizar-base" class="btn btn-outline-warning btn-sm">&#x21BB; Sincronizar base</button>
+                        <button id="btn-query-all-ip" class="btn btn-primary btn-sm">Actualizar contadores</button>
+                    </div>
+                </div>
+                <div id="base-sync-status" class="small text-warning mb-1" style="display:none;"></div>
+                <div id="ip-list-status" class="small text-light mb-2"></div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-dark table-hover align-middle" id="ip-list-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Oficina</th>
+                                <th>Canal</th>
+                                <th>Serie</th>
+                                <th>Contador (correo)</th>
+                                <th>Ultima lectura</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ip-list-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ===== HISTORIAL DE UNA IMPRESORA (por correo) ===== -->
+            <section class="panel mb-4" id="ip-history-panel" style="display:none;">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h3 class="mb-0">Historial de correos: <span id="ip-history-title"></span></h3>
+                    <button id="btn-close-history" class="btn btn-outline-light btn-sm">Cerrar</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-dark" id="ip-history-table">
+                        <thead>
+                            <tr><th>Fecha correo</th><th>Contador</th><th>Total impreso</th><th>Escaneado</th><th>Toner %</th><th>Asunto</th></tr>
+                        </thead>
+                        <tbody id="ip-history-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ===== COMPARADOR MANUAL DE CONTADORES ===== -->
+            <section class="panel mb-4">
+                <h3>Comparador de Contadores</h3>
+                <div class="row g-2 mb-3">
+                    <div class="col-md-3"><input id="serial-input" class="form-control form-control-sm" placeholder="Numero de serie" /></div>
+                    <div class="col-md-2"><input id="compare-period" class="form-control form-control-sm" placeholder="Periodo (YYYY-MM)" /></div>
+                    <div class="col-md-3"><input id="provider-counter" type="number" class="form-control form-control-sm" placeholder="Contador proveedor" /></div>
+                    <div class="col-md-2"><input id="machine-counter" type="number" class="form-control form-control-sm" placeholder="Contador maquina (opcional)" /></div>
+                    <div class="col-md-2"><button id="btn-compare" class="btn btn-warning w-100">Comparar</button></div>
+                </div>
+                <div class="small text-light mb-2">Si diligencias el periodo, el contador de maquina se toma automaticamente desde el Excel de ese mes.</div>
+                    <!-- Resultado del comparativo (verdict) -->
+                    <div id="counter-verdict-wrap" class="counter-verdict-wrap">
+                        <div class="counter-verdict-header">
+                            <div>
+                                <p class="meta-label">Resultado del comparativo</p>
+                                <p class="meta-serie" id="counter-verdict-serie">—</p>
+                            </div>
+                            <span id="counter-verdict-badge"></span>
+                        </div>
+                        <div class="counter-verdict-stats">
+                            <div class="counter-stat-box">
+                                <div class="counter-stat-label">Contador Proveedor</div>
+                                <div class="counter-stat-value" id="c-prov">—</div>
+                            </div>
+                            <div class="counter-stat-box">
+                                <div class="counter-stat-label">Contador Máquina</div>
+                                <div class="counter-stat-value" id="c-maq">—</div>
+                            </div>
+                            <div class="counter-stat-box diff-box" id="c-diff-box">
+                                <div class="counter-stat-label">Diferencia</div>
+                                <div class="counter-stat-value" id="c-diff">—</div>
+                            </div>
+                            <div class="counter-stat-box">
+                                <div class="counter-stat-label">% de Error</div>
+                                <div class="counter-stat-value" id="c-pct">—</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="counter-result" class="small text-light mt-2"></div>
+            </section>
+
+            <section class="row g-3 mb-4">
+                <div class="col-12 col-xl-7">
+                    <div class="panel">
+                        <h3>Comparador de Contadores (Proveedor vs Maquina)</h3>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped table-dark" id="counter-compare-table">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Serie</th>
+                                        <th>Oficina</th>
+                                        <th>Proveedor</th>
+                                        <th>Maquina</th>
+                                        <th>Diferencia</th>
+                                        <th>% Error</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-xl-5">
+                    <div class="panel">
+                        <h3>Ultimo Contador Reportado en Excel</h3>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-dark" id="counter-excel-table">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Serie</th>
+                                        <th>Oficina</th>
+                                        <th>Contador</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== COMPARATIVOS MENSUALES GUARDADOS ===== -->
+            <section class="panel mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h3 class="mb-0">&#x1F4C5; Comparativos Mensuales Guardados</h3>
+                    <div class="d-flex gap-2 align-items-center">
+                        <div id="comparativos-periodo-sel" class="custom-sel" data-placeholder="-- Periodo --" style="width:160px;">
+                            <button type="button" class="custom-sel-btn form-select form-select-sm" data-value="">-- Periodo --</button>
+                            <div class="custom-sel-menu"></div>
+                        </div>
+                        <button id="btn-ver-comparativos" class="btn btn-outline-info btn-sm">Ver</button>
+                    </div>
+                </div>
+                <div id="comparativos-status" class="small text-muted mb-2"></div>
+                <div class="table-responsive" id="comparativos-wrap" style="display:none;">
+                    <table class="table table-sm table-dark table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Serie</th><th>Oficina</th><th>Proveedor</th>
+                                <th>Maquina</th><th>Diferencia</th><th>% Error</th><th>Fuente</th><th>Guardado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comparativos-body"></tbody>
+                    </table>
+                </div>
+            </section>
+            </section>
+
+            <section class="view-section" data-section="reportes" style="display:none;">
+            <section class="panel mb-4">
+                <h3>Reporte General por Oficina</h3>
+                <div class="row g-2 mb-3">
+                    <div class="col-md-3">
+                        <input id="report-general-period" class="form-control form-control-sm" placeholder="Periodo (YYYY-MM, opcional)" />
+                    </div>
+                    <div class="col-md-3">
+                        <button id="btn-report-general" class="btn btn-primary w-100">Generar General</button>
+                    </div>
+                    <div class="col-md-3">
+                        <button id="btn-export-general-xlsx" class="btn btn-outline-light w-100">Exportar General Excel</button>
+                    </div>
+                    <div class="col-md-3">
+                        <button id="btn-export-general-pdf" class="btn btn-outline-light w-100">Exportar General PDF</button>
+                    </div>
+                </div>
+                <div id="report-general-result" class="small text-light mb-2"></div>
+
+                <div id="report-general-wrap" style="display:none;">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped table-dark align-middle mb-0" id="report-general-detail-table">
+                            <thead>
+                                <tr>
+                                    <th>Oficina</th>
+                                    <th>Impresora</th>
+                                    <th>Serie</th>
+                                    <th>Área / Canal</th>
+                                    <th class="text-end">Contador Máquina</th>
+                                    <th>Tóner</th>
+                                    <th>Última lectura</th>
+                                </tr>
+                            </thead>
+                            <tbody id="report-general-detail-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel mb-4">
+                <h3>Reportes por Impresora</h3>
+                <div class="row g-2 mb-3">
+                    <div class="col-md-4">
+                        <div id="report-serial-select" class="custom-sel mb-1" data-placeholder="-- Seleccionar impresora --">
+                            <button type="button" class="custom-sel-btn form-select form-select-sm" data-value="">-- Seleccionar impresora --</button>
+                            <div class="custom-sel-menu"></div>
+                        </div>
+                        <input id="report-serial" class="form-control form-control-sm" placeholder="O escribir serie manualmente" />
+                    </div>
+                    <div class="col-md-3"><input id="period-a" class="form-control form-control-sm" placeholder="Periodo A (ej. 2025-06)" /></div>
+                    <div class="col-md-3"><input id="period-b" class="form-control form-control-sm" placeholder="Periodo B (ej. 2025-12)" /></div>
+                    <div class="col-md-2"><button id="btn-report" class="btn btn-info w-100">Generar Comparativo</button></div>
+                </div>
+                <div class="d-flex gap-2 mb-2">
+                    <button id="btn-export-xlsx" class="btn btn-outline-light">Exportar Excel</button>
+                    <button id="btn-export-pdf" class="btn btn-outline-light">Exportar PDF</button>
+                </div>
+                <div id="report-result" class="small text-light mb-2"></div>
+                <!-- Comparativo detallado inline -->
+                <div id="report-detail-wrap" style="display:none;">
+                    <div id="report-detail-inner"></div>
+                </div>
+            </section>
+
+            </section>
+
+            <section class="view-section" data-section="mantenimiento" style="display:none;">
+            <section class="panel mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="mb-0">Programa de Mantenimiento</h3>
+                    <button id="btn-sync-mantenimientos" class="btn btn-outline-warning btn-sm">
+                        &#x21BA; Actualizar Mantenimientos
+                    </button>
+                </div>
+                <p id="maint-status" class="small text-muted mb-2"></p>
+                <ul id="maintenance-list" class="list-group list-group-flush"></ul>
+            </section>
+
+            </section>
+
+            <section class="view-section" data-section="admin" style="display:none;">
+            <section class="panel mb-4">
+                <h3>Ingreso a Zona Admin</h3>
+                <div class="row g-2 align-items-center mb-2">
+                    <div class="col-md-4">
+                        <input id="admin-pass" class="form-control form-control-sm" type="password" placeholder="Clave admin" />
+                    </div>
+                    <div class="col-md-2">
+                        <button id="btn-admin-auth" class="btn btn-outline-light w-100 btn-sm">Validar</button>
+                    </div>
+                </div>
+                <div id="admin-auth-status" class="small text-light"></div>
+            </section>
+
+            <section id="admin-panel" class="panel mb-4" style="display:none;">
+                <h3>Control de Credenciales</h3>
+                <p class="small text-light">Define una sola cuenta de ingreso y una clave separada para admin.</p>
+                <div class="row g-2 mb-2">
+                    <div class="col-md-4">
+                        <input id="new-login-user" class="form-control form-control-sm" placeholder="Nuevo usuario de ingreso" />
+                    </div>
+                    <div class="col-md-4">
+                        <input id="new-login-pass" class="form-control form-control-sm" type="password" placeholder="Nueva clave de ingreso" />
+                    </div>
+                    <div class="col-md-4">
+                        <input id="new-admin-pass" class="form-control form-control-sm" type="password" placeholder="Nueva clave admin" />
+                    </div>
+                </div>
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <button id="btn-save-credentials" class="btn btn-success w-100 btn-sm">Guardar credenciales</button>
+                    </div>
+                </div>
+                <div id="admin-save-status" class="small text-light mt-2"></div>
+
+                <hr class="border-secondary my-3" />
+                <h3>Impresoras Base</h3>
+                <p class="small text-light mb-2">Carga las 32 impresoras del inventario con sus seriales, ciudades y canal. Actualiza las existentes.</p>
+                <div class="row g-2 align-items-center mb-2">
+                    <div class="col-md-4">
+                        <button id="btn-cargar-base-impresoras" class="btn btn-primary w-100 btn-sm">Cargar / Actualizar impresoras base</button>
+                    </div>
+                    <div class="col-md-8">
+                        <div id="base-impresoras-status" class="small text-light"></div>
+                    </div>
+                </div>
+
+                <hr class="border-secondary my-3" />
+                <!-- ===== CAMBIAR CREDENCIALES DE CORREO ===== -->
+                <h3>&#x1F510; Cambiar Credenciales de Correo</h3>
+                <p class="small text-light mb-2">Requiere clave admin para modificar las credenciales IMAP.</p>
+                <div class="row g-2 mb-2" id="imap-cred-form" style="display:none;">
+                    <div class="col-md-4">
+                        <input id="imap-new-user" class="form-control form-control-sm" placeholder="Correo IMAP" />
+                    </div>
+                    <div class="col-md-4">
+                        <input id="imap-new-pass" class="form-control form-control-sm" type="password" placeholder="Contrasena / app password" />
+                    </div>
+                    <div class="col-md-4">
+                        <input id="imap-new-host" class="form-control form-control-sm" placeholder="IMAP host" />
+                    </div>
+                    <div class="col-md-4 mt-2">
+                        <input id="imap-new-folder" class="form-control form-control-sm" placeholder="Carpeta (ej: datecsa)" />
+                    </div>
+                    <div class="col-md-4 mt-2">
+                        <input id="imap-admin-pass" class="form-control form-control-sm" type="password" placeholder="Clave admin para confirmar" />
+                    </div>
+                    <div class="col-md-4 mt-2">
+                        <button id="btn-save-imap-creds" class="btn btn-success w-100 btn-sm">Guardar credenciales IMAP</button>
+                    </div>
+                    <div id="imap-cred-status" class="col-12 small text-light mt-1"></div>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-md-4">
+                        <button id="btn-toggle-imap-creds" class="btn btn-outline-warning w-100 btn-sm">&#x270F; Cambiar credenciales</button>
+                    </div>
+                </div>
+
+                <hr class="border-secondary my-3" />
+                <h3>Lectura de Correos de Impresoras</h3>
+                <p class="small text-light mb-2">Importa correos tipo notificacion de contador (Kyocera) y guarda detalle en la base de datos.</p>
+                <div class="row g-2 mb-2">
+                    <div class="col-md-4">
+                        <input id="mail-user" class="form-control form-control-sm" placeholder="Correo" readonly style="opacity:0.7;cursor:not-allowed;" />
+                    </div>
+                    <div class="col-md-4">
+                        <input id="mail-pass" class="form-control form-control-sm" type="password" placeholder="Clave o app password" readonly style="opacity:0.7;cursor:not-allowed;" />
+                    </div>
+                    <div class="col-md-4">
+                        <input id="mail-host" class="form-control form-control-sm" placeholder="IMAP host" readonly style="opacity:0.7;cursor:not-allowed;" />
+                    </div>
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-md-3">
+                        <input id="mail-folder" class="form-control form-control-sm" placeholder="Carpeta" readonly style="opacity:0.7;cursor:not-allowed;" />
+                    </div>
+                    <div class="col-md-3">
+                        <input id="mail-sender-filter" class="form-control form-control-sm" placeholder="Filtro remitente (opcional)" />
+                    </div>
+                    <div class="col-md-3">
+                        <input id="mail-subject-filter" class="form-control form-control-sm" placeholder="Filtro asunto (opcional)" />
+                    </div>
+                    <div class="col-md-3">
+                        <input id="mail-max" class="form-control form-control-sm" type="number" min="1" max="200" value="50" placeholder="Max correos" />
+                    </div>
+                </div>
+                <div class="row g-2 align-items-center mb-2">
+                    <div class="col-md-3">
+                        <button id="btn-mail-import" class="btn btn-warning w-100 btn-sm">Importar correos</button>
+                    </div>
+                    <div class="col-md-3">
+                        <button id="btn-mail-refresh" class="btn btn-outline-info w-100 btn-sm">Ver ultimas lecturas</button>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-check mt-1">
+                            <input class="form-check-input" type="checkbox" value="1" id="mail-only-unseen" checked>
+                            <label class="form-check-label small text-light" for="mail-only-unseen">
+                                Solo no leidos
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-md-4">
+                        <input id="mail-local-folder" class="form-control form-control-sm" placeholder="Carpeta local de correos" />
+                    </div>
+                    <div class="col-md-3">
+                        <input id="mail-local-pattern" class="form-control form-control-sm" placeholder="Patron archivos (*.txt,*.htm,*.html)" value="*.txt,*.htm,*.html" />
+                    </div>
+                    <div class="col-md-2">
+                        <button id="btn-mail-local-browse" class="btn btn-secondary w-100 btn-sm">Seleccionar carpeta</button>
+                    </div>
+                    <div class="col-md-3">
+                        <button id="btn-mail-local-import" class="btn btn-success w-100 btn-sm">Importar local</button>
+                    </div>
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-md-6">
+                        <button id="btn-mail-diagnose" class="btn btn-info w-100 btn-sm">Diagnosticar archivos</button>
+                    </div>
+                    <div class="col-md-6">
+                        <button id="btn-mail-show-serials" class="btn btn-warning w-100 btn-sm">Ver seriales en BD</button>
+                    </div>
+                </div>
+                <div id="mail-import-status" class="small text-light mb-2"></div>
+                <div id="mail-diagnose-results" class="small text-light mb-3" style="display:none; max-height:300px; overflow-y:auto; border:1px solid #555; padding:10px; background:#1a1a1a;"></div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-dark table-hover align-middle" id="mail-readings-table">
+                        <thead>
+                            <tr>
+                                <th>Importado</th>
+                                <th>Meter Date</th>
+                                <th>Serie</th>
+                                <th>Modelo</th>
+                                <th>Oficina</th>
+                                <th>Contador</th>
+                                <th>Toner</th>
+                                <th>Asunto</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mail-readings-body"></tbody>
+                    </table>
+                </div>
+            </section>
+            </section>
+
+            <!-- ===== NUEVA BASE DE DATOS ===== -->
+            <section class="view-section" data-section="nueva-bd" style="display:none;">
+            <section class="panel mb-4">
+                <h3>&#x1F5C4; Crear Nueva Base de Datos</h3>
+                <p class="small text-muted mb-3">
+                    Crea una nueva base de datos MySQL con la misma estructura de tablas de este sistema.
+                    Útil para instalar el aplicativo en otro equipo o crear un entorno de respaldo.
+                </p>
+
+                <div id="bd-mysql-status" class="mb-3"></div>
+
+                <div class="row g-2 mb-2">
+                    <div class="col-md-3">
+                        <label class="form-label small mb-1">Host MySQL</label>
+                        <input id="bd-host" class="form-control form-control-sm" value="127.0.0.1" placeholder="127.0.0.1" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small mb-1">Puerto</label>
+                        <input id="bd-port" class="form-control form-control-sm" value="3306" placeholder="3306" type="number" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small mb-1">Usuario</label>
+                        <input id="bd-user" class="form-control form-control-sm" value="root" placeholder="root" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small mb-1">Contraseña (dejar vacío si no tiene)</label>
+                        <input id="bd-password" class="form-control form-control-sm" type="password" placeholder="Contraseña MySQL" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small mb-1">Nombre de la BD</label>
+                        <input id="bd-name" class="form-control form-control-sm" value="print_analytics" placeholder="print_analytics" />
+                    </div>
+                </div>
+                <div class="row g-2 align-items-center mb-3">
+                    <div class="col-md-3">
+                        <button id="btn-crear-bd" class="btn btn-success w-100 btn-sm">
+                            &#x2795; Crear Base de Datos
+                        </button>
+                    </div>
+                    <div class="col-md-9">
+                        <p id="bd-create-status" class="small mb-0"></p>
+                    </div>
+                </div>
+
+                <div id="bd-tablas-resultado" style="display:none;">
+                    <h5 class="small fw-bold mb-2">Tablas creadas:</h5>
+                    <ul id="bd-tablas-lista" class="list-group list-group-flush small"></ul>
+                </div>
+            </section>
+            </section>
+
+            <!-- ===== HISTORIAL MENSUAL ===== -->
+            <section class="view-section" data-section="historial" style="display:none;">
+            <section class="panel mb-4">
+                <h3>&#x1F4C5; Historial Mensual de Backups</h3>
+                <p class="text-muted small">Backups automáticos guardados el día 24 de cada mes. También puedes sincronizarlos con la carpeta de red para compartir entre equipos.</p>
+                <div class="d-flex gap-2 mb-3 flex-wrap align-items-center">
+                    <button id="btn-crear-backup" class="btn btn-sm btn-primary">&#x1F4BE; Crear Backup Ahora</button>
+                    <button id="btn-refresh-backups" class="btn btn-sm btn-outline-secondary">&#x1F504; Actualizar lista</button>
+                    <button id="btn-sync-red" class="btn btn-sm btn-outline-success">&#x1F310; Sincronizar a red</button>
+                    <span id="backup-sync-status" class="small text-muted"></span>
+                </div>
+                <div id="backup-status" class="small text-muted mb-2"></div>
+                <div id="backup-lista" class="list-group mb-4"></div>
+            </section>
+
+            <!-- Panel de detalle del backup seleccionado -->
+            <section class="panel mb-4" id="backup-detalle-panel" style="display:none;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 id="backup-detalle-titulo">Detalle del período</h4>
+                    <button id="btn-cerrar-backup" class="btn btn-sm btn-outline-secondary">✖ Cerrar</button>
+                </div>
+
+                <!-- Gráfica histórica de páginas por mes -->
+                <div class="mb-4">
+                    <h5 class="fw-bold" style="color:#1A2B4A;">📊 Páginas por mes</h5>
+                    <canvas id="chart-historial-paginas" height="80"></canvas>
+                </div>
+
+                <!-- Comparativos del período -->
+                <div class="mb-4">
+                    <h5 class="fw-bold" style="color:#1A2B4A;">Comparativos Proveedor vs Máquina</h5>
+                    <div id="backup-comparativos-tabla" class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead><tr><th>Serie</th><th>Oficina</th><th>Proveedor</th><th>Máquina</th><th>Diferencia</th><th>% Error</th></tr></thead>
+                            <tbody id="backup-comp-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Historial de lecturas -->
+                <div>
+                    <h5 class="fw-bold" style="color:#1A2B4A;">Lecturas de correo del período</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead><tr><th>Serie</th><th>Oficina</th><th>Contador</th><th>Tóner</th><th>Fecha</th></tr></thead>
+                            <tbody id="backup-hist-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Gráficas históricas globales -->
+            <section class="panel mb-4">
+                <h4 class="fw-bold" style="color:#1A2B4A;">&#x1F4C8; Tendencia Mensual Global</h4>
+                <p class="text-muted small">Evolución de páginas impresas y % de error acumulado por mes.</p>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <canvas id="chart-tendencia-paginas" height="120"></canvas>
+                    </div>
+                    <div class="col-md-6">
+                        <canvas id="chart-tendencia-error" height="120"></canvas>
+                    </div>
+                </div>
+                <button id="btn-cargar-tendencia" class="btn btn-sm btn-outline-primary mt-3">Cargar gráficas históricas</button>
+            </section>
+            </section>
+
+            <!-- ===== ACTUALIZACIONES ===== -->
+            <section class="view-section" data-section="actualizaciones" style="display:none;">
+
+            <!-- ── TARJETA PRINCIPAL DE VERSIÓN ── -->
+            <section class="panel mb-4">
+                <h3>&#x1F504; Centro de Actualizaciones</h3>
+
+                <!-- Estado de versión -->
+                <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin:18px 0 8px;">
+                    <div style="background:linear-gradient(135deg,#1A2B4A,#2563eb);color:white;border-radius:12px;padding:16px 24px;min-width:200px;">
+                        <div style="font-size:11px;opacity:.75;text-transform:uppercase;letter-spacing:.5px;">Versión instalada</div>
+                        <div id="version-actual" style="font-size:26px;font-weight:700;margin-top:4px;">v1.1.0</div>
+                        <div id="update-equipo-nombre" style="font-size:11px;opacity:.6;margin-top:2px;"></div>
+                    </div>
+                    <div id="update-version-nueva-card" style="display:none;background:linear-gradient(135deg,#065f46,#059669);color:white;border-radius:12px;padding:16px 24px;min-width:200px;">
+                        <div style="font-size:11px;opacity:.75;text-transform:uppercase;letter-spacing:.5px;">Nueva versión disponible</div>
+                        <div id="update-version-nueva-label" style="font-size:26px;font-weight:700;margin-top:4px;">—</div>
+                        <div id="update-fecha-label" style="font-size:11px;opacity:.75;margin-top:2px;"></div>
+                    </div>
+                    <div style="flex:1;min-width:180px;">
+                        <button id="btn-check-update" class="btn btn-primary" style="padding:10px 22px;font-size:15px;border-radius:8px;">
+                            <span id="btn-check-update-icon">&#x1F50D;</span> Buscar actualizaciones
+                        </button>
+                        <div id="update-check-spinner" style="display:none;margin-top:8px;" class="text-muted small">
+                            <span class="spinner-border spinner-border-sm"></span> Verificando en la carpeta compartida...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resultado / Acción -->
+                <div id="update-check-result" class="mt-2 small"></div>
+                <div id="update-install-card" style="display:none;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:16px 20px;margin-top:14px;">
+                    <div style="font-weight:600;color:#166534;margin-bottom:6px;">&#x2B07; Actualización lista para instalar</div>
+                    <ul id="update-notas-list" class="small text-muted mb-3" style="padding-left:18px;"></ul>
+                    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                        <button id="btn-instalar-update" class="btn btn-success" style="font-weight:600;">
+                            &#x26A1; Instalar y reiniciar ahora
+                        </button>
+                        <span class="text-muted small">El aplicativo se cerrará, instalará la nueva versión desde la red y se reabrirá automáticamente.</span>
+                    </div>
+                    <div id="install-progress" class="mt-2 small"></div>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- Configuración de ruta -->
+                <h5 class="mb-2">&#x2699;&#xFE0F; Configuración de carpeta compartida</h5>
+                <p class="text-muted small mb-2">
+                    Ruta de la carpeta de red donde se publican las actualizaciones.<br>
+                    <strong>Recomendado:</strong> <code>\\10.100.10.41\CPAnalisis\AVISTA_CPAnalisis</code>
+                </p>
+                <div class="input-group mb-1" style="max-width:600px;">
+                    <span class="input-group-text">&#x1F4C1;</span>
+                    <input id="update-folder-input" class="form-control" placeholder="Ej: \\10.100.10.41\CPAnalisis\AVISTA_CPAnalisis" />
+                    <button id="btn-guardar-update-folder" class="btn btn-outline-primary">Guardar</button>
+                </div>
+                <div id="update-folder-status" class="form-text mb-3"></div>
+
+                <hr class="my-4">
+
+                <!-- Instrucciones paso a paso -->
+                <h5>&#x1F4CB; Cómo publicar una nueva versión</h5>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:12px;">
+                    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;">
+                        <div style="font-size:22px;margin-bottom:6px;">1️⃣</div>
+                        <div class="fw-bold small">Compila el .exe</div>
+                        <div class="text-muted small">Genera el nuevo <code>AVISTA_CPAnalisis.exe</code> con PyInstaller</div>
+                    </div>
+                    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;">
+                        <div style="font-size:22px;margin-bottom:6px;">2️⃣</div>
+                        <div class="fw-bold small">Sube a la red</div>
+                        <div class="text-muted small">Copia <code>AVISTA_CPAnalisis.exe</code> y la carpeta <code>_internal\</code> a:<br><code>\\10.100.10.41\CPAnalisis\AVISTA_CPAnalisis\</code></div>
+                    </div>
+                    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;">
+                        <div style="font-size:22px;margin-bottom:6px;">3️⃣</div>
+                        <div class="fw-bold small">Crea version.json</div>
+                        <div class="text-muted small">En esa misma carpeta crea el archivo <code>version.json</code>:</div>
+                        <pre style="font-size:11px;margin-top:6px;background:#fff;border-radius:4px;padding:6px;border:1px solid #e2e8f0;">{
+  "version": "1.2.0",
+  "fecha": "2026-06-03",
+  "notas": ["Mejora X","Fix Y"]
+}</pre>
+                    </div>
+                    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;">
+                        <div style="font-size:22px;margin-bottom:6px;">4️⃣</div>
+                        <div class="fw-bold small">Notificación automática</div>
+                        <div class="text-muted small">Todos los equipos que tengan el aplicativo detectarán la nueva versión al verificar (cada 4 horas o al hacer clic en "Buscar").</div>
+                    </div>
+                </div>
+            </section>
+
+            </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Baner de actualización disponible (flotante) -->
+    <div id="update-notification-bar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9990;background:#1A2B4A;color:white;padding:10px 20px;align-items:center;gap:16px;">
+        <span id="update-notif-text" style="flex:1;font-size:13px;"></span>
+        <button id="btn-notif-instalar" style="background:#27ae60;border:none;color:white;padding:6px 14px;border-radius:4px;font-weight:bold;cursor:pointer;">⬇️ Instalar</button>
+        <button onclick="document.querySelector('[data-section=actualizaciones]').click();document.getElementById('update-notification-bar').style.display='none';" style="background:#E83C6C;border:none;color:white;padding:6px 14px;border-radius:4px;font-weight:bold;cursor:pointer;">Ver detalles</button>
+        <button onclick="document.getElementById('update-notification-bar').style.display='none';" style="background:transparent;border:1px solid rgba(255,255,255,0.4);color:white;padding:6px 12px;border-radius:4px;cursor:pointer;">Ignorar</button>
+    </div>
+
+    <!-- Modal: Enviar alerta de tóner al proveedor -->
+    <div id="toner-email-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.65);align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:10px;max-width:640px;width:94%;padding:28px 28px 20px;box-shadow:0 8px 40px rgba(0,0,0,0.4);position:relative;">
+            <button onclick="cerrarModalToner()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#555;">&times;</button>
+            <h5 style="color:#1A2B4A;font-weight:700;margin-bottom:4px;">&#x1F4E7; Alerta de Tóner — Notificación al Proveedor</h5>
+            <p id="toner-email-subtitle" style="color:#666;font-size:0.85rem;margin-bottom:16px;"></p>
+            <div style="margin-bottom:10px;">
+                <label style="font-size:0.8rem;font-weight:600;color:#333;">Para:</label>
+                <input id="toner-email-to" class="form-control form-control-sm" value="stbogota@datecsa.com" readonly style="background:#f5f5f5;" />
+            </div>
+            <div style="margin-bottom:10px;">
+                <label style="font-size:0.8rem;font-weight:600;color:#333;">CC:</label>
+                <input id="toner-email-cc" class="form-control form-control-sm" placeholder="Se asigna automáticamente" style="background:#f5f5f5;" readonly />
+            </div>
+            <div style="margin-bottom:10px;">
+                <label style="font-size:0.8rem;font-weight:600;color:#333;">Asunto:</label>
+                <input id="toner-email-subject" class="form-control form-control-sm" style="background:#f5f5f5;" readonly />
+            </div>
+            <div style="margin-bottom:16px;">
+                <label style="font-size:0.8rem;font-weight:600;color:#333;">Cuerpo del correo:</label>
+                <textarea id="toner-email-body" class="form-control form-control-sm" rows="10" style="font-size:0.82rem;font-family:inherit;resize:vertical;"></textarea>
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
+                <button onclick="cerrarModalToner()" class="btn btn-secondary btn-sm">Cancelar</button>
+                <button onclick="abrirCorreoToner()" class="btn btn-primary btn-sm">&#x1F4E8; Abrir en cliente de correo</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+    <script src="assets/chart.min.js"></script>
+    <script src="assets/app.js"></script>
+</body>
+</html>

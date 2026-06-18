@@ -1,0 +1,33 @@
+{
+  "periodo": "2026-04",
+  "generado_en": "2026-06-09T11:42:55.704286",
+  "version_app": "1.1.0",
+  "comparativos": [
+    {
+      "id": 1,
+      "periodo": "2026-04",
+      "numero_serie": "R4P0Y66708",
+      "oficina": "Girardot",
+      "contador_proveedor": 89468,
+      "contador_maquina": 72495,
+      "diferencia": -16973,
+      "porcentaje_error": "18.9700",
+      "fuente": "auto_excel",
+      "guardado_en": "2026-04-30 14:52:10"
+    },
+    {
+      "id": 2,
+      "periodo": "2026-04",
+      "numero_serie": "R4P1172375",
+      "oficina": "Bogota",
+      "contador_proveedor": 30726,
+      "contador_maquina": 31740,
+      "diferencia": 1014,
+      "porcentaje_error": "3.3000",
+      "fuente": "auto_excel",
+      "guardado_en": "2026-04-30 14:52:10"
+    }
+  ],
+  "historial_lecturas": [],
+  "impresiones": []
+}

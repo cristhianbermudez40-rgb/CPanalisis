@@ -1,0 +1,37 @@
+[No suele recibir correo electrónico de printer-monitor@ecosys.kyocera.co. Descubra por qué esto es importante en https://aka.ms/LearnAboutSenderIdentification ]
+
+Equipment ID:
+Model Name:             ECOSYS M3655idn
+Serial Number:          R4P0354322
+MeterDate:              Mon 07 Apr 2026 14:32:18
+Counters by Function:
+ Printed Pages:
+  Copier:               45
+  Printer:              95802
+  FAX:                  0
+  Total:                95847
+ Scanned Pages:
+  Copier:               2100
+  FAX:                  0
+  Total:                23156
+ Combined Sheets:
+  none:                 95847
+  2in1:                 0
+  4in1:                 0
+
+Consumables:
+ Black:                 67%
+
+Equipment Log:
+<2026-04-07 14:30:00>
+ AddPaper Lower Tray
+
+<2026-04-07 14:15:35>
+ TonerAlert Black Cartridge 67%
+
+<2026-04-07 13:45:12>
+ DoorOpen Scanner Access
+
+End of Meter Events
+========================================================================
+End of Report
